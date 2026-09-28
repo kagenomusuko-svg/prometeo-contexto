@@ -48,7 +48,7 @@ assert.equal(result.matches.find((match) => match.id === "node-r-star").locator.
 assert.throws(
   () => queryParadigma({
     mapDocument,
-    query: "R*",
+    query: "",
     sourceRef: "Paradigma@map-commit",
     retrievedAt: "2026-09-28T19:00:00Z",
     actorId: "prometeo-lenguaje",
