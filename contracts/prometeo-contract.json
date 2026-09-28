@@ -1,0 +1,6 @@
+{
+  "contractId": "prometeo-contracts",
+  "contractVersion": "0.2.0",
+  "sourceRepository": "kagenomusuko-svg/prometeo-esquema",
+  "manifestRef": "contracts/manifest.json@0.2.0"
+}

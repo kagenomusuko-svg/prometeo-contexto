@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node tests/query.test.mjs"
+    "test": "node tests/query.test.mjs && node tests/contract-version.test.mjs",
+    "contract-version": "node tests/contract-version.test.mjs"
   }
 }
