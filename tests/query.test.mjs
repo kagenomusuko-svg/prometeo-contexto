@@ -42,8 +42,8 @@ assert.equal(result.requiresSourceReading, true);
 assert.equal(result.provenance.sourceObjectId, "kagenomusuko-svg/Paradigma@map-commit");
 assert.ok(result.matches.some((match) => match.id === "node-r-star"));
 assert.ok(result.matches.some((match) => match.id === "route-r-star"));
-assert.equal(result.matches[0].evidenceStatus, "explicit");
-assert.equal(result.matches[0].locator.workId, "metrologia-causal");
+assert.equal(result.matches.find((match) => match.id === "node-r-star").evidenceStatus, "explicit");
+assert.equal(result.matches.find((match) => match.id === "node-r-star").locator.workId, "metrologia-causal");
 
 assert.throws(
   () => queryParadigma({
