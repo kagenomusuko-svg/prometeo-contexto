@@ -62,12 +62,38 @@ export function queryParadigma({
       const text = searchableText(entry).toLocaleLowerCase();
       const score = terms.filter((term) => text.includes(term)).length;
       if (score === 0) return null;
+      const workId = entry.work_id ?? (category === "works" ? entry.id : null);
+      const work = workId ? workById.get(workId) : (category === "works" ? entry : null);
+      const sourceLocators = (Array.isArray(entry.evidence) ? entry.evidence : [])
+        .map((reference) => typeof reference === "string" ? evidenceById.get(reference) : reference)
+        .filter((evidence) => evidence && typeof evidence === "object")
+        .map((evidence) => {
+          const evidenceWork = workById.get(evidence.work_id);
+          return {
+            evidenceId: evidence.id ?? null,
+            locator: evidence.segment ?? evidence.locator ?? evidence.localizer ?? null,
+            canonicalSource: evidenceWork?.source ?? null,
+            workId: evidence.work_id ?? null,
+            workTitle: evidenceWork?.title ?? null,
+            sourceLines: Array.isArray(evidence.source_lines) ? evidence.source_lines : null,
+            section: evidence.section ?? null,
+            evidenceType: evidence.evidence_type ?? null,
+          };
+        })
+        .filter((item) => item.canonicalSource || item.locator);
+      const directLocator = entry.locator ?? entry.localizer ?? entry.segment ?? entry.source ?? null;
+      const canonicalSource = work?.source ?? (category === "works" ? entry.source : null);
       return {
         id: entry.id,
         category,
         score,
         label: entry.label ?? entry.name ?? entry.title ?? entry.id,
-        locator: entry.locator ?? entry.localizer ?? entry.source ?? null,
+        locator: directLocator ?? sourceLocators[0]?.locator ?? canonicalSource,
+        canonicalSource,
+        workId: workId ?? null,
+        workTitle: work?.title ?? null,
+        sourceLines: Array.isArray(entry.source_lines) ? entry.source_lines : null,
+        sourceLocators,
         evidenceStatus: entry.status ?? entry.evidence_status ?? "unclassified",
       };
     })
@@ -134,32 +160,48 @@ export async function readParadigmaSources({
 
   const sources = [];
   for (const match of mapResult.matches ?? []) {
-    if (!match || typeof match !== "object" || !match.locator) {
-      throw new ContextError("SOURCE_LOCATOR_REQUIRED", "every match must have a locator");
+    if (!match || typeof match !== "object") {
+      throw new ContextError("SOURCE_LOCATOR_REQUIRED", "every match must be an object");
     }
-    const loaded = await readSource(match.locator, match);
-    const text = sourceText(loaded);
-    if (!text || text.trim().length === 0) {
-      throw new ContextError(
-        "SOURCE_TEXT_UNAVAILABLE",
-        "reader returned no canonical text for " + match.id,
-      );
+    const targets = Array.isArray(match.sourceLocators) && match.sourceLocators.length > 0
+      ? match.sourceLocators
+      : [{ locator: match.locator, canonicalSource: match.canonicalSource, sourceLines: match.sourceLines }];
+    for (const target of targets) {
+      const locator = target.canonicalSource ?? target.locator;
+      if (!locator) {
+        throw new ContextError("SOURCE_LOCATOR_REQUIRED", "every match must resolve to a canonical source locator");
+      }
+      const loaded = await readSource(locator, { ...match, ...target });
+      const loadedText = sourceText(loaded);
+      if (!loadedText || loadedText.trim().length === 0) {
+        throw new ContextError(
+          "SOURCE_TEXT_UNAVAILABLE",
+          "reader returned no canonical text for " + (target.evidenceId ?? match.id),
+        );
+      }
+      const lines = target.sourceLines;
+      const text = Array.isArray(lines) && lines.length === 2
+        ? loadedText.split(/\\r?\\n/u).slice(lines[0] - 1, lines[1]).join("\\n")
+        : loadedText;
+      if (!text || text.trim().length === 0) {
+        throw new ContextError("SOURCE_TEXT_UNAVAILABLE", "selected canonical passage is empty");
+      }
+      const sourceRef = loaded && typeof loaded === "object" ? loaded.sourceRef : null;
+      const sourceVersion = loaded && typeof loaded === "object" ? loaded.sourceVersion : null;
+      requiredString(sourceRef, "reader result sourceRef");
+      requiredString(sourceVersion, "reader result sourceVersion");
+      sources.push({
+        id: target.evidenceId ?? match.id,
+        category: target.evidenceId ? "evidence" : match.category,
+        label: target.section ?? match.label,
+        locator: target.locator ?? match.locator,
+        text,
+        mapEvidenceStatus: match.evidenceStatus,
+        sourceRef,
+        sourceVersion,
+        contextOnly: true,
+      });
     }
-    const sourceRef = loaded && typeof loaded === "object" ? loaded.sourceRef : null;
-    const sourceVersion = loaded && typeof loaded === "object" ? loaded.sourceVersion : null;
-    requiredString(sourceRef, "reader result sourceRef");
-    requiredString(sourceVersion, "reader result sourceVersion");
-    sources.push({
-      id: match.id,
-      category: match.category,
-      label: match.label,
-      locator: match.locator,
-      text,
-      mapEvidenceStatus: match.evidenceStatus,
-      sourceRef,
-      sourceVersion,
-      contextOnly: true,
-    });
   }
 
   return {
