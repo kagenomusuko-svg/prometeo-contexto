@@ -54,6 +54,8 @@ export function queryParadigma({
   requiredString(actorId, "actorId");
 
   const terms = query.toLocaleLowerCase().split(/\s+/u).filter(Boolean);
+  const workById = new Map((mapDocument.works ?? []).filter((work) => work?.id).map((work) => [work.id, work]));
+  const evidenceById = new Map((mapDocument.evidence ?? []).filter((item) => item?.id).map((item) => [item.id, item]));
   const matches = collectionEntries(mapDocument)
     .map(({ category, entry }) => {
       if (!entry || typeof entry !== "object" || typeof entry.id !== "string") {
@@ -181,7 +183,7 @@ export async function readParadigmaSources({
       }
       const lines = target.sourceLines;
       const text = Array.isArray(lines) && lines.length === 2
-        ? loadedText.split(/\\r?\\n/u).slice(lines[0] - 1, lines[1]).join("\\n")
+        ? loadedText.split(/\r?\n/u).slice(lines[0] - 1, lines[1]).join("\n")
         : loadedText;
       if (!text || text.trim().length === 0) {
         throw new ContextError("SOURCE_TEXT_UNAVAILABLE", "selected canonical passage is empty");
