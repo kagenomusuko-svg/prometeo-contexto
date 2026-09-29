@@ -85,7 +85,7 @@ assert.equal(resolved.sources[0].sourceVersion, "canonical-blob-sha");
 assert.equal(decodeURIComponent(new URL(resolved.sources[0].sourceRef).pathname), "/kagenomusuko-svg/Paradigma/blob/" + sourceCommit + "/" + canonicalPath);
 assert.ok(calls.every((call) => call.method === "GET"));
 
-await assert.rejects(
+assert.throws(
   () => createParadigmaGitHubReader({ fetchImpl, sourceCommit: "main" }),
   (error) => error.code === "INVALID_SOURCE_COMMIT",
 );
