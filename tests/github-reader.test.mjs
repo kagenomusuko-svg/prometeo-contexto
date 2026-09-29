@@ -82,7 +82,7 @@ assert.equal(resolved.sources[0].id, "ev.prometeo.prologue");
 assert.equal(resolved.sources[0].text, "Línea uno del corpus canónico.\nLínea dos conserva el contexto.");
 assert.equal(resolved.sources[0].contextOnly, true);
 assert.equal(resolved.sources[0].sourceVersion, "canonical-blob-sha");
-assert.ok(resolved.sources[0].sourceRef.includes(encodeURIComponent(canonicalPath).replaceAll("%2F", "/")));
+assert.equal(decodeURIComponent(new URL(resolved.sources[0].sourceRef).pathname), "/kagenomusuko-svg/Paradigma/blob/" + sourceCommit + "/" + canonicalPath);
 assert.ok(calls.every((call) => call.method === "GET"));
 
 await assert.rejects(
