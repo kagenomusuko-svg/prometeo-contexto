@@ -90,3 +90,92 @@ export function queryParadigma({
     },
   };
 }
+
+function requiredFunction(value, field) {
+  if (typeof value !== "function") {
+    throw new ContextError("SOURCE_READER_REQUIRED", field + " must be a function");
+  }
+}
+
+function sourceText(value) {
+  if (typeof value === "string") return value;
+  if (value && typeof value === "object" && typeof value.text === "string") {
+    return value.text;
+  }
+  return null;
+}
+
+/**
+ * Reads canonical corpus text after map lookup.
+ *
+ * The reader is injected so Paradigma remains an external, read-only
+ * dependency. The returned text is context, not case evidence and cannot
+ * promote a linguistic proposal.
+ */
+export async function readParadigmaSources({
+  mapResult,
+  readSource,
+  retrievedAt,
+  actorId = "prometeo-contexto",
+}) {
+  if (!mapResult || typeof mapResult !== "object" || Array.isArray(mapResult)) {
+    throw new ContextError("INVALID_MAP_RESULT", "mapResult must be an object");
+  }
+  if (mapResult.contextStatus !== "map-locators-only" || mapResult.requiresSourceReading !== true) {
+    throw new ContextError(
+      "INVALID_MAP_RESULT",
+      "mapResult must be an unconsumed map lookup",
+    );
+  }
+  requiredString(mapResult.mapVersion, "mapResult.mapVersion");
+  requiredString(retrievedAt, "retrievedAt");
+  requiredString(actorId, "actorId");
+  requiredFunction(readSource, "readSource");
+
+  const sources = [];
+  for (const match of mapResult.matches ?? []) {
+    if (!match || typeof match !== "object" || !match.locator) {
+      throw new ContextError("SOURCE_LOCATOR_REQUIRED", "every match must have a locator");
+    }
+    const loaded = await readSource(match.locator, match);
+    const text = sourceText(loaded);
+    if (!text || text.trim().length === 0) {
+      throw new ContextError(
+        "SOURCE_TEXT_UNAVAILABLE",
+        "reader returned no canonical text for " + match.id,
+      );
+    }
+    const sourceRef = loaded && typeof loaded === "object" ? loaded.sourceRef : null;
+    const sourceVersion = loaded && typeof loaded === "object" ? loaded.sourceVersion : null;
+    requiredString(sourceRef, "reader result sourceRef");
+    requiredString(sourceVersion, "reader result sourceVersion");
+    sources.push({
+      id: match.id,
+      category: match.category,
+      label: match.label,
+      locator: match.locator,
+      text,
+      mapEvidenceStatus: match.evidenceStatus,
+      sourceRef,
+      sourceVersion,
+      contextOnly: true,
+    });
+  }
+
+  return {
+    query: mapResult.query,
+    mapVersion: mapResult.mapVersion,
+    sources,
+    contextStatus: "source-text-read",
+    requiresSourceReading: false,
+    provenance: {
+      kind: "deterministic-system",
+      actorId,
+      recordedAt: retrievedAt,
+      sourceObjectId: mapResult.provenance.sourceObjectId,
+      sourceVersion: mapResult.mapVersion,
+      reason: "Paradigma canonical corpus read after map lookup",
+    },
+  };
+}
+\n
