@@ -15,8 +15,16 @@ export function createParadigmaReadOnlyFetch({ token, fetchImpl = globalThis.fet
 
   return async function fetchParadigma(input, init = {}) {
     const url = new URL(input);
-    if (url.protocol !== "https:" || url.hostname !== "api.github.com") {
-      throw new ContextError("GITHUB_HOST_BLOCKED", "authenticated requests are restricted to api.github.com");
+    if (
+      url.protocol !== "https:"
+      || url.hostname !== "api.github.com"
+      || !url.pathname.startsWith("/repos/kagenomusuko-svg/Paradigma/contents/")
+    ) {
+      throw new ContextError("GITHUB_HOST_BLOCKED", "authenticated requests are restricted to Paradigma Contents API");
+    }
+    const pinnedRef = url.searchParams.get("ref");
+    if (!pinnedRef || !/^[a-f0-9]{40}$/u.test(pinnedRef)) {
+      throw new ContextError("IMMUTABLE_REF_REQUIRED", "authenticated reads require a full pinned commit SHA");
     }
     if (String(init.method ?? "GET").toUpperCase() !== "GET") {
       throw new ContextError("READ_ONLY_ENFORCED", "Paradigma access permits GET requests only");
