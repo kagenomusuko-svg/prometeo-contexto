@@ -11,16 +11,24 @@ const authenticatedFetch = createParadigmaReadOnlyFetch({
   }
 });
 await authenticatedFetch(
-  "https://api.github.com/repos/kagenomusuko-svg/Paradigma/contents/mapa/mapa-maestro.json",
+  "https://api.github.com/repos/kagenomusuko-svg/Paradigma/contents/mapa/mapa-maestro.json?ref=e7c7b06eebd56e412a8b27f3c58747af2d1e531c",
   { method: "GET", headers: { Accept: "application/vnd.github+json" } }
 );
 assert.equal(call.method, "GET");
 assert.equal(call.authorization, "Bearer read-only-test-token");
-assert.ok(call.url.startsWith("https://api.github.com/repos/kagenomusuko-svg/Paradigma/"));
+assert.ok(call.url.startsWith("https://api.github.com/repos/kagenomusuko-svg/Paradigma/contents/"));
 
 await assert.rejects(
-  () => authenticatedFetch("https://example.org/private", { method: "GET" }),
+  () => authenticatedFetch("https://example.org/private?ref=e7c7b06eebd56e412a8b27f3c58747af2d1e531c", { method: "GET" }),
   (error) => error instanceof ContextError && error.code === "GITHUB_HOST_BLOCKED"
+);
+await assert.rejects(
+  () => authenticatedFetch("https://api.github.com/repos/another-owner/another-repo/contents/private?ref=e7c7b06eebd56e412a8b27f3c58747af2d1e531c", { method: "GET" }),
+  (error) => error instanceof ContextError && error.code === "GITHUB_HOST_BLOCKED"
+);
+await assert.rejects(
+  () => authenticatedFetch("https://api.github.com/repos/kagenomusuko-svg/Paradigma/contents/mapa/mapa-maestro.json", { method: "GET" }),
+  (error) => error instanceof ContextError && error.code === "IMMUTABLE_REF_REQUIRED"
 );
 await assert.rejects(
   () => authenticatedFetch("https://api.github.com/repos/kagenomusuko-svg/Paradigma/contents/mapa/mapa-maestro.json", { method: "POST" }),
