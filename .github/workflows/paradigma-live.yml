@@ -1,0 +1,24 @@
+name: Paradigma live read-only verification
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-paradigma-live:
+    runs-on: ubuntu-latest
+    env:
+      PROMETEO_PARADIGMA_READ_TOKEN: ${{ secrets.PROMETEO_PARADIGMA_READ_TOKEN }}
+      PARADIGMA_SOURCE_COMMIT: e7c7b06eebd56e412a8b27f3c58747af2d1e531c
+      PARADIGMA_QUERY: método Prometeo
+    steps:
+      - name: Checkout contexto
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify pinned Paradigma map and canonical source
+        run: npm run verify:paradigma-live
