@@ -23,6 +23,6 @@ Para comprobar acceso live a Paradigma privado desde una máquina autorizada:
 2. Añade en `.env.local` un token GitHub con permiso read-only para Paradigma en `PROMETEO_PARADIGMA_READ_TOKEN`.
 3. Ejecuta `npm run verify:paradigma-live`.
 
-El token sólo se envía en solicitudes HTTPS GET a `api.github.com`; no se imprime. El reporte registra el SHA fijado, la versión del mapa, el SHA de la fuente y `contextOnly: true`, sin imprimir el texto recuperado. `.env.local` está ignorado por Git.
+El token sólo se envía por HTTPS al endpoint Contents de `kagenomusuko-svg/Paradigma`, en solicitudes GET ancladas a un SHA completo; no puede usarse desde este adaptador para otros repositorios ni operaciones de escritura y nunca se imprime. El reporte registra el SHA fijado, la versión del mapa, el SHA de la fuente y `contextOnly: true`, sin imprimir el texto recuperado. `.env.local` está ignorado por Git.
 
 La implementación está en `src/github-reader.mjs`; la autenticación read-only, en `src/github-auth.mjs`.
