@@ -30,4 +30,4 @@ La prueba autenticada es independiente del backend lingüístico y no utiliza cr
 npm run verify:paradigma-live
 ```
 
-La variable del token es `PROMETEO_PARADIGMA_READ_TOKEN`; el commit de fuente se fija con `PARADIGMA_SOURCE_COMMIT`. La función de transporte impone HTTPS, el host `api.github.com` y el método GET. El script no imprime token ni texto de Paradigma. Las pruebas de CI verifican el aislamiento del secreto, el host y el método; sólo la prueba live acredita permisos y lectura auténtica.
+La variable del token es `PROMETEO_PARADIGMA_READ_TOKEN`; el commit de fuente se fija con `PARADIGMA_SOURCE_COMMIT`. La función de transporte limita HTTPS al endpoint Contents de `kagenomusuko-svg/Paradigma`, exige un SHA de 40 caracteres y permite sólo GET. El script no imprime token ni texto de Paradigma. Las pruebas de CI verifican el aislamiento del secreto, el host y el método; sólo la prueba live acredita permisos y lectura auténtica.
