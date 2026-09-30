@@ -10,4 +10,5 @@
 - Se añade un transporte GitHub con token encapsulado, limitado por HTTPS al endpoint Contents de Paradigma, GET-only y referencias completas fijadas a commit.
 - Se añade `npm run verify:paradigma-live` para comprobar mapa y fuente canónica privada usando un commit fijado; el reporte no imprime texto ni credencial.
 - Se documentan `.env.local` y `.env.example`; la configuración local y secretos quedan fuera de Git.
+- Se añade el workflow manual `Paradigma live read-only verification`, separado de la CI lingüística y restringido al token read-only de Paradigma.
 - CI incluye pruebas deterministas de aislamiento de token y límite read-only; éstas no sustituyen la comprobación live.
