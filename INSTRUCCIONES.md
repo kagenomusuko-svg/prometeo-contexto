@@ -20,3 +20,14 @@
 ## Validación
 
 Ejecutar `npm test`. Las pruebas con fake fetch verifican el contrato del adaptador, no permisos de GitHub ni recuperación autenticada de Paradigma. La integración viva debe fijar un commit concreto y limitarse a lectura.
+
+
+## Verificación live de acceso a Paradigma
+
+La prueba autenticada es independiente del backend lingüístico y no utiliza credenciales de proveedores de modelos. Copia `.env.example` a `.env.local`, configura ahí un token GitHub con permiso de sólo lectura sobre `kagenomusuko-svg/Paradigma`, y ejecuta:
+
+```sh
+npm run verify:paradigma-live
+```
+
+La variable del token es `PROMETEO_PARADIGMA_READ_TOKEN`; el commit de fuente se fija con `PARADIGMA_SOURCE_COMMIT`. La función de transporte impone HTTPS, el host `api.github.com` y el método GET. El script no imprime token ni texto de Paradigma. Las pruebas de CI verifican el aislamiento del secreto, el host y el método; sólo la prueba live acredita permisos y lectura auténtica.
