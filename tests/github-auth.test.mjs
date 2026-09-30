@@ -31,7 +31,7 @@ await assert.rejects(
   (error) => error instanceof ContextError && error.code === "IMMUTABLE_REF_REQUIRED"
 );
 await assert.rejects(
-  () => authenticatedFetch("https://api.github.com/repos/kagenomusuko-svg/Paradigma/contents/mapa/mapa-maestro.json", { method: "POST" }),
+  () => authenticatedFetch("https://api.github.com/repos/kagenomusuko-svg/Paradigma/contents/mapa/mapa-maestro.json?ref=e7c7b06eebd56e412a8b27f3c58747af2d1e531c", { method: "POST" }),
   (error) => error instanceof ContextError && error.code === "READ_ONLY_ENFORCED"
 );
 assert.throws(
