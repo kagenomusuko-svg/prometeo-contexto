@@ -3,9 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node tests/query.test.mjs && node tests/source-reading.test.mjs && node tests/contract-version.test.mjs && node tests/contract-compatibility.test.mjs && node tests/github-reader.test.mjs",
+    "test": "node tests/query.test.mjs && node tests/source-reading.test.mjs && node tests/contract-version.test.mjs && node tests/contract-compatibility.test.mjs && node tests/github-reader.test.mjs && node tests/github-auth.test.mjs",
     "contract-version": "node tests/contract-version.test.mjs",
     "contract-compatibility": "node tests/contract-compatibility.test.mjs",
-    "ci": "npm test"
+    "ci": "npm test",
+    "verify:paradigma-live": "node scripts/verify-paradigma-live.mjs"
   }
 }
