@@ -7,7 +7,7 @@
 - Se añaden pruebas de lector con fetch simulado; no constituyen evidencia de acceso autenticado en vivo.
 
 ## 2026-09-30
-- Se añade un transporte GitHub con token encapsulado y restricciones HTTPS, host `api.github.com` y GET-only.
+- Se añade un transporte GitHub con token encapsulado, limitado por HTTPS al endpoint Contents de Paradigma, GET-only y referencias completas fijadas a commit.
 - Se añade `npm run verify:paradigma-live` para comprobar mapa y fuente canónica privada usando un commit fijado; el reporte no imprime texto ni credencial.
 - Se documentan `.env.local` y `.env.example`; la configuración local y secretos quedan fuera de Git.
 - CI incluye pruebas deterministas de aislamiento de token y límite read-only; éstas no sustituyen la comprobación live.
